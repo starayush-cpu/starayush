@@ -19,8 +19,11 @@
     --muted:#a1a1aa;
     --muted-2:#71717a;
     --accent:#ff5c1a;
+    --accent-soft:rgba(255,92,26,.13);
+    --accent-line:rgba(255,92,26,.38);
     --accent-text:#0a0a0b;
-    --shadow:0 12px 28px rgba(0,0,0,.38);
+    --ease:cubic-bezier(.16,1,.3,1);
+    --shadow:0 14px 30px rgba(0,0,0,.42);
   }
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%}
@@ -31,9 +34,17 @@
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     line-height:1.5;
     -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    -webkit-tap-highlight-color:transparent;
     overflow-x:hidden;
   }
   a{color:inherit}
+  ::selection{background:var(--accent);color:var(--accent-text)}
+  .sr-only{
+    position:absolute;width:1px;height:1px;
+    margin:-1px;padding:0;border:0;
+    overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;
+  }
 
   /* Subtle animated film grain over the page */
   body::after{
@@ -72,18 +83,28 @@
 
   /* Entrance animation (hero timeline) */
   .anim-item{
-    animation:rise .7s cubic-bezier(.22,.8,.3,1) both;
+    animation:rise .85s cubic-bezier(.16,1,.3,1) both;
     animation-delay:var(--d,0s);
   }
   @keyframes rise{
-    from{opacity:0;transform:translateY(16px)}
+    from{opacity:0;transform:translateY(20px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+
+  /* Feed cards ease in as they render */
+  .pop-in{
+    animation:pop .6s cubic-bezier(.16,1,.3,1) both;
+    animation-delay:var(--pd,0s);
+  }
+  @keyframes pop{
+    from{opacity:0;transform:translateY(12px)}
     to{opacity:1;transform:translateY(0)}
   }
 
   /* Scroll reveal: hidden state only when JS is running */
   html.js .reveal{opacity:0}
   html.js .reveal.in{
-    animation:rise .6s cubic-bezier(.22,.8,.3,1) both;
+    animation:rise .7s cubic-bezier(.16,1,.3,1) both;
     animation-delay:var(--rd,0s);
   }
 
@@ -105,11 +126,18 @@
   .identity-text strong{display:block;font-size:15px;font-weight:650;letter-spacing:-0.01em}
   .identity-text span{display:block;font-size:13px;color:var(--muted)}
   .top-note{
+    display:inline-flex;align-items:center;gap:7px;
     font-size:12.5px;font-weight:600;color:var(--muted);
     border:1px solid var(--border);
     background:var(--surface);
-    padding:7px 11px;border-radius:999px;
+    padding:7px 12px;border-radius:999px;
     white-space:nowrap;
+  }
+  .top-note::before{
+    content:"";
+    width:6px;height:6px;border-radius:50%;
+    background:var(--accent);
+    flex:0 0 auto;
   }
 
   /* Avatar: real X profile photo, monogram fallback behind it */
@@ -117,7 +145,7 @@
     position:relative;
     border-radius:50%;
     border:2px solid var(--accent);
-    box-shadow:0 0 0 5px rgba(255,92,26,.13);
+    box-shadow:0 0 0 6px rgba(255,92,26,.09),0 0 0 7px rgba(255,92,26,.25);
     overflow:hidden;
     background:var(--surface);
     flex:0 0 auto;
@@ -135,9 +163,12 @@
     object-fit:cover;
     display:block;
   }
-  .avatar-sm{width:44px;height:44px;border-width:1.5px;box-shadow:0 0 0 3px rgba(255,92,26,.12)}
+  .avatar-sm{width:44px;height:44px;border-width:1.5px;box-shadow:0 0 0 4px rgba(255,92,26,.09),0 0 0 5px rgba(255,92,26,.22)}
   .avatar-sm .avatar-fallback{font-size:20px}
-  .avatar-hero{width:96px;height:96px;margin-bottom:24px}
+  .avatar-hero{
+    width:96px;height:96px;margin-bottom:24px;
+    box-shadow:0 0 0 8px rgba(255,92,26,.09),0 0 0 9px rgba(255,92,26,.25),0 24px 44px rgba(0,0,0,.45);
+  }
   .avatar-hero .avatar-fallback{font-size:42px}
 
   /* Hero */
@@ -161,16 +192,18 @@
   @media (min-width:640px){ .tagline{font-size:21px} }
 
   .rule{
-    height:1px;background:var(--border);
-    margin:40px 0 0;border:0;
+    height:1px;border:0;
+    margin:40px 0 0;
+    background:linear-gradient(90deg,transparent,var(--border) 18%,var(--border) 82%,transparent);
   }
 
   /* Sections */
   section{margin-top:36px}
   .section-head{
-    display:flex;align-items:baseline;justify-content:space-between;gap:16px;
-    margin:0 0 14px;
+    display:flex;align-items:center;gap:14px;
+    margin:0 0 16px;
   }
+  .section-head .line{flex:1;height:1px;background:var(--border)}
   .section-head h2{
     margin:0;
     font-size:12px;
@@ -195,16 +228,23 @@
     border-radius:14px;
     padding:16px;
     min-height:76px;
-    transition:background .15s ease, border-color .15s ease, transform .18s ease, box-shadow .18s ease;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+    transition:background .18s ease, border-color .18s ease, transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s ease;
   }
-  .card:hover,.card:focus-visible{
+  .card:focus-visible{
     background:var(--surface-hover);
     border-color:var(--border-hover);
-    transform:translateY(-3px);
-    box-shadow:var(--shadow);
     outline:none;
   }
-  .card:active{transform:translateY(-1px) scale(0.99);box-shadow:none}
+  @media (hover:hover){
+    .card:hover{
+      background:var(--surface-hover);
+      border-color:var(--border-hover);
+      transform:translateY(-3px);
+      box-shadow:var(--shadow);
+    }
+  }
+  .card:active{transform:translateY(-1px) scale(.99);background:var(--surface-hover);box-shadow:none}
   .card:focus-visible{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--accent)}
 
   .icon{
@@ -214,9 +254,14 @@
     border:1px solid #2c2c30;
     display:grid;place-items:center;
     color:var(--text);
-    transition:transform .18s ease;
+    transition:transform .22s cubic-bezier(.16,1,.3,1), background .18s ease, border-color .18s ease, color .18s ease;
   }
-  .card:hover .icon,.card:focus-visible .icon{transform:translateY(-2px) scale(1.06)}
+  .card:hover .icon,.card:focus-visible .icon{
+    transform:translateY(-2px) scale(1.06);
+    background:var(--accent-soft);
+    border-color:var(--accent-line);
+    color:var(--accent);
+  }
   .icon svg{width:22px;height:22px;display:block}
 
   .card-body{flex:1;min-width:0}
@@ -273,15 +318,23 @@
     border:1px solid var(--border);
     border-radius:14px;
     padding:16px;
-    transition:background .15s ease, border-color .15s ease, transform .18s ease, box-shadow .18s ease;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+    transition:background .18s ease, border-color .18s ease, transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s ease;
   }
-  .post-card:hover,.post-card:focus-visible{
+  .post-card:focus-visible{
     background:var(--surface-hover);
     border-color:var(--border-hover);
-    transform:translateY(-3px);
-    box-shadow:var(--shadow);
     outline:none;
   }
+  @media (hover:hover){
+    .post-card:hover{
+      background:var(--surface-hover);
+      border-color:var(--border-hover);
+      transform:translateY(-3px);
+      box-shadow:var(--shadow);
+    }
+  }
+  .post-card:active{transform:translateY(-1px) scale(.995);background:var(--surface-hover)}
   .post-card:focus-visible{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--accent)}
   .post-text{
     display:block;
@@ -295,6 +348,7 @@
     margin-top:12px;
     font-size:13px;color:var(--muted-2);
   }
+  .post-meta .date::before{content:"\00B7";margin-right:10px}
   .post-meta .src{color:var(--muted);font-weight:600}
   .post-meta .open{margin-left:auto;color:var(--accent);font-weight:600;white-space:nowrap}
 
@@ -306,23 +360,44 @@
     border:1px solid var(--border);
     border-radius:14px;
     overflow:hidden;
-    transition:background .15s ease, border-color .15s ease, transform .18s ease, box-shadow .18s ease;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+    transition:background .18s ease, border-color .18s ease, transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s ease;
   }
-  .video-card:hover,.video-card:focus-visible{
+  .video-card:focus-visible{
     background:var(--surface-hover);
     border-color:var(--border-hover);
-    transform:translateY(-3px);
-    box-shadow:var(--shadow);
     outline:none;
   }
+  @media (hover:hover){
+    .video-card:hover{
+      background:var(--surface-hover);
+      border-color:var(--border-hover);
+      transform:translateY(-3px);
+      box-shadow:var(--shadow);
+    }
+  }
+  .video-card:active{transform:translateY(-1px) scale(.995);background:var(--surface-hover)}
   .video-card:focus-visible{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--accent)}
-  .video-card img{
+  .thumb{position:relative;display:block;overflow:hidden;background:#1e1e21}
+  .thumb img{
     width:100%;
-    aspect-ratio:4/3;
+    aspect-ratio:16/9;
     object-fit:cover;
     display:block;
-    background:#1e1e21;
+    transition:transform .5s cubic-bezier(.16,1,.3,1);
   }
+  @media (hover:hover){
+    .video-card:hover .thumb img{transform:scale(1.04)}
+  }
+  .play-badge{
+    position:absolute;right:12px;bottom:12px;
+    width:34px;height:34px;border-radius:50%;
+    display:grid;place-items:center;
+    background:rgba(10,10,11,.72);
+    border:1px solid rgba(255,255,255,.22);
+    color:#fff;
+  }
+  .play-badge svg{width:13px;height:13px;display:block;margin-left:2px}
   .video-body{display:block;padding:14px 16px 16px}
   .video-title{
     display:block;
@@ -340,6 +415,26 @@
   }
   .feed-status a{color:var(--accent);font-weight:600;text-decoration:none}
   .feed-status a:hover{text-decoration:underline}
+
+  /* Loading skeletons for the live feeds */
+  .skel{pointer-events:none}
+  .skel-line,.skel-block{
+    display:block;
+    border-radius:8px;
+    background:linear-gradient(100deg,#1b1b1e 40%,#28282d 50%,#1b1b1e 60%);
+    background-size:200% 100%;
+    animation:shimmer 1.4s linear infinite;
+  }
+  @keyframes shimmer{
+    from{background-position:120% 0}
+    to{background-position:-80% 0}
+  }
+  .skel-line{height:12px;margin-top:10px}
+  .skel-line:first-child{margin-top:2px}
+  .skel-line.w85{width:85%}
+  .skel-line.w60{width:60%}
+  .skel-line.w40{width:40%}
+  .skel-thumb{aspect-ratio:16/9;border-radius:0}
 
   footer{
     margin-top:48px;
@@ -390,6 +485,9 @@
     .card:active{transform:none}
     .card:hover .icon,.card:focus-visible .icon{transform:none}
     .card:hover .arrow,.card:focus-visible .arrow{transform:none}
+    .thumb img{transition:none}
+    .skel-line,.skel-block{animation:none}
+    .pop-in{animation:none}
   }
 </style>
 </head>
@@ -426,6 +524,7 @@
     <section aria-labelledby="socials-heading">
       <div class="section-head reveal">
         <h2 id="socials-heading">Socials</h2>
+        <span class="line" aria-hidden="true"></span>
         <span>5 links</span>
       </div>
       <div class="stack">
@@ -499,6 +598,7 @@
     <section aria-labelledby="posts-heading">
       <div class="section-head reveal">
         <h2 id="posts-heading">Latest Posts</h2>
+        <span class="line" aria-hidden="true"></span>
         <span id="posts-updated"></span>
       </div>
 
@@ -507,8 +607,23 @@
         Bluesky
         <a href="https://bsky.app/profile/starayush.bsky.social" target="_blank" rel="noopener noreferrer">View profile</a>
       </h3>
-      <div class="posts-grid" id="bsky-posts">
-        <p class="feed-status">Loading posts...</p>
+      <div class="posts-grid" id="bsky-posts" aria-busy="true">
+        <span class="sr-only" role="status">Loading posts</span>
+        <div class="post-card skel" aria-hidden="true">
+          <span class="skel-line w85"></span>
+          <span class="skel-line"></span>
+          <span class="skel-line w40"></span>
+        </div>
+        <div class="post-card skel" aria-hidden="true">
+          <span class="skel-line"></span>
+          <span class="skel-line w60"></span>
+          <span class="skel-line w40"></span>
+        </div>
+        <div class="post-card skel" aria-hidden="true">
+          <span class="skel-line w85"></span>
+          <span class="skel-line w60"></span>
+          <span class="skel-line w40"></span>
+        </div>
       </div>
 
       <h3 class="subhead reveal">
@@ -516,8 +631,22 @@
         YouTube
         <a href="https://www.youtube.com/@0xstarayush" target="_blank" rel="noopener noreferrer">View channel</a>
       </h3>
-      <div class="video-grid" id="yt-videos">
-        <p class="feed-status">Loading videos...</p>
+      <div class="video-grid" id="yt-videos" aria-busy="true">
+        <span class="sr-only" role="status">Loading videos</span>
+        <div class="video-card skel" aria-hidden="true">
+          <span class="skel-block skel-thumb"></span>
+          <span class="video-body">
+            <span class="skel-line w85"></span>
+            <span class="skel-line w40"></span>
+          </span>
+        </div>
+        <div class="video-card skel" aria-hidden="true">
+          <span class="skel-block skel-thumb"></span>
+          <span class="video-body">
+            <span class="skel-line w60"></span>
+            <span class="skel-line w40"></span>
+          </span>
+        </div>
       </div>
     </section>
 
@@ -577,6 +706,7 @@
     src.className = 'src';
     src.textContent = source;
     var date = document.createElement('span');
+    date.className = 'date';
     date.textContent = dateText;
     var open = document.createElement('span');
     open.className = 'open';
@@ -671,12 +801,13 @@
     }).slice(0, 6);
     if (!items.length) return false;
     var frag = document.createDocumentFragment();
-    items.forEach(function (it) {
+    items.forEach(function (it, i) {
       var p = it.post;
       var rkey = p.uri.split('/').pop();
       var a = externalLink(document.createElement('a'),
         'https://bsky.app/profile/starayush.bsky.social/post/' + rkey);
-      a.className = 'post-card';
+      a.className = 'post-card pop-in';
+      a.style.setProperty('--pd', Math.min(i * 70, 350) + 'ms');
       var text = document.createElement('span');
       text.className = 'post-text';
       text.textContent = p.record.text;
@@ -686,6 +817,7 @@
     });
     box.innerHTML = '';
     box.appendChild(frag);
+    box.removeAttribute('aria-busy');
     markUpdated();
     return true;
   }
@@ -717,15 +849,24 @@
   function renderYt(box, videos) {
     if (!videos.length) return false;
     var frag = document.createDocumentFragment();
-    videos.forEach(function (v) {
+    videos.forEach(function (v, i) {
       var a = externalLink(document.createElement('a'), v.link);
-      a.className = 'video-card';
+      a.className = 'video-card pop-in';
+      a.style.setProperty('--pd', Math.min(i * 70, 350) + 'ms');
       if (v.thumb) {
+        var thumb = document.createElement('span');
+        thumb.className = 'thumb';
         var img = document.createElement('img');
         img.src = v.thumb;
         img.alt = 'Video thumbnail: ' + v.title;
         img.loading = 'lazy';
-        a.appendChild(img);
+        thumb.appendChild(img);
+        var badge = document.createElement('span');
+        badge.className = 'play-badge';
+        badge.setAttribute('aria-hidden', 'true');
+        badge.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>';
+        thumb.appendChild(badge);
+        a.appendChild(thumb);
       }
       var body = document.createElement('span');
       body.className = 'video-body';
@@ -739,6 +880,7 @@
     });
     box.innerHTML = '';
     box.appendChild(frag);
+    box.removeAttribute('aria-busy');
     markUpdated();
     return true;
   }
