@@ -1284,9 +1284,12 @@
     }
   }
 
-  /* YouTube: latest videos from the channel RSS feed. First source is a JSON
-     proxy; if it fails, the raw RSS is fetched through CORS proxies and
-     parsed directly, so the list does not depend on one service. */
+  /* YouTube: latest videos from the channel RSS feed. The rss2json list
+     renders first, then the raw RSS is checked in the background through
+     the allorigins proxy in case rss2json served a stale cached copy.
+     If rss2json fails entirely, the raw RSS is fetched through CORS
+     proxies and parsed directly, so the list does not depend on one
+     service. */
   function ytVideoId(link) {
     var m = /[?&]v=([\w-]{6,})/.exec(link || '') ||
             /\/shorts\/([\w-]{6,})/.exec(link || '') ||
@@ -1376,40 +1379,59 @@
     }
     return out;
   }
+  function ytNewestTime(videos) {
+    var newest = 0;
+    (videos || []).forEach(function (v) {
+      var t = new Date(String(v.date || '').replace(' ', 'T')).getTime();
+      if (!isNaN(t) && t > newest) newest = t;
+    });
+    return newest;
+  }
   var ytBox = document.getElementById('yt-videos');
   if (ytBox) {
     if (!window.fetch || !window.DOMParser) {
       ytFallback(ytBox);
     } else {
       var rssUrl = 'https://www.youtube.com/feeds/videos.xml?channel_id=UCwqL1sAZ1lhNZ6mkzwtCSSQ';
-      tryEach([
-        function () {
-          return fetchJson('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rssUrl))
-            .then(function (data) {
-              var vids = ytFromJson(data);
-              if (!vids.length) throw new Error('empty');
-              return vids;
-            });
-        },
-        function () {
-          return fetchText('https://api.allorigins.win/raw?url=' + encodeURIComponent(rssUrl))
-            .then(function (text) {
-              var vids = ytFromXml(text);
-              if (!vids.length) throw new Error('empty');
-              return vids;
-            });
-        },
-        function () {
-          return fetchText('https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(rssUrl))
-            .then(function (text) {
-              var vids = ytFromXml(text);
-              if (!vids.length) throw new Error('empty');
-              return vids;
-            });
-        }
-      ]).then(function (vids) {
-        if (!renderYt(ytBox, vids)) ytFallback(ytBox);
-      }).catch(function () { ytFallback(ytBox); });
+      function ytFromRss2json() {
+        return fetchJson('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rssUrl))
+          .then(function (data) {
+            var vids = ytFromJson(data);
+            if (!vids.length) throw new Error('empty');
+            return vids;
+          });
+      }
+      function ytFromAllorigins() {
+        return fetchText('https://api.allorigins.win/raw?url=' + encodeURIComponent(rssUrl))
+          .then(function (text) {
+            var vids = ytFromXml(text);
+            if (!vids.length) throw new Error('empty');
+            return vids;
+          });
+      }
+      function ytFromCodetabs() {
+        return fetchText('https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(rssUrl))
+          .then(function (text) {
+            var vids = ytFromXml(text);
+            if (!vids.length) throw new Error('empty');
+            return vids;
+          });
+      }
+      ytFromRss2json().then(function (vids) {
+        if (!renderYt(ytBox, vids)) throw new Error('empty');
+        /* rss2json can serve a cached copy of the feed that is hours old,
+           so also check the raw feed in the background and swap in its
+           list when its newest video is newer than the one already shown. */
+        ytFromAllorigins().then(function (fresh) {
+          if (fresh.length && ytNewestTime(fresh) > ytNewestTime(vids)) {
+            renderYt(ytBox, fresh);
+          }
+        }).catch(function () {});
+      }).catch(function () {
+        tryEach([ytFromAllorigins, ytFromCodetabs]).then(function (vids) {
+          if (!renderYt(ytBox, vids)) ytFallback(ytBox);
+        }).catch(function () { ytFallback(ytBox); });
+      });
     }
   }
 })();
