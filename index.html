@@ -708,6 +708,87 @@
   .feed-status a{color:var(--accent);font-weight:700;text-decoration:none}
   .feed-status a:hover{text-decoration:underline}
 
+  /* What I post line under the hero */
+  .what-post{
+    margin:20px 0 0;
+    font-size:15.5px;line-height:1.55;color:var(--muted);
+    max-width:min(46ch,100%);
+    overflow-wrap:break-word;
+  }
+  .what-post b{
+    display:inline-block;margin-right:9px;
+    font-family:var(--font-display);font-size:12.5px;font-weight:600;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--accent);
+  }
+
+  /* Featured latest video at the top of Latest Posts */
+  .featured-card{border-color:var(--accent-line)}
+  .featured-card .video-title{font-size:20px}
+  @media (min-width:900px){ .featured-card .video-title{font-size:24px} }
+  .latest-badge{
+    position:absolute;top:12px;left:12px;z-index:2;
+    background:var(--accent);color:var(--accent-text);
+    font-size:11.5px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;
+    padding:6px 11px;border-radius:999px;
+    box-shadow:0 6px 18px rgba(0,0,0,.35);
+  }
+
+  /* Long Bluesky posts clamp with a read more toggle */
+  .post-text.clamp{
+    display:-webkit-box;
+    -webkit-line-clamp:4;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .post-text.clamp.expanded{display:block;overflow:visible}
+  .post-more{
+    display:inline-block;margin-top:9px;
+    font-size:13.5px;font-weight:700;color:var(--accent);
+    cursor:pointer;
+  }
+  .post-more:hover{text-decoration:underline}
+  .post-more:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+  /* Follow call to action */
+  .follow-cta{
+    margin-top:30px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:22px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  .follow-cta h3{
+    margin:0;
+    font-family:var(--font-display);
+    font-size:20px;font-weight:600;letter-spacing:.01em;
+  }
+  .follow-cta p{
+    margin:8px 0 0;
+    font-size:15px;line-height:1.55;color:var(--muted);
+    max-width:52ch;
+  }
+  .follow-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .btn{
+    display:inline-flex;align-items:center;gap:9px;
+    font-size:14.5px;font-weight:700;text-decoration:none;
+    padding:12px 20px;border-radius:999px;
+    transition:transform .25s var(--ease), background .18s ease, border-color .18s ease, color .18s ease, box-shadow .25s ease;
+  }
+  .btn svg{width:18px;height:18px;flex:0 0 auto}
+  .btn-accent{background:var(--accent);color:var(--accent-text);border:1px solid var(--accent)}
+  .btn-outline{background:transparent;color:var(--text);border:1px solid var(--border-hover)}
+  @media (hover:hover){
+    .btn:hover{transform:translateY(-2px)}
+    .btn-accent:hover{box-shadow:0 10px 24px rgba(255,92,26,.28)}
+    .btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+  }
+  .btn:focus-visible{outline:none;box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--accent)}
+  .disclaimer{
+    margin:16px 2px 0;
+    font-size:13px;line-height:1.55;color:var(--muted-2);
+  }
+
   /* Loading skeletons for the live feeds */
   .skel{pointer-events:none}
   .skel-line,.skel-block{
@@ -795,7 +876,7 @@
     .top-note::before{animation:none}
     html.js .reveal{opacity:1}
     html.js .reveal.in{animation:none}
-    .card,.arrow,.icon,.post-card,.video-card,.play-badge{transition:none}
+    .card,.arrow,.icon,.post-card,.video-card,.play-badge,.btn{transition:none}
     .card:hover,.card:focus-visible{transform:none;box-shadow:none}
     .post-card:hover,.post-card:focus-visible,.video-card:hover,.video-card:focus-visible{transform:none;box-shadow:none}
     .card:active{transform:none}
@@ -863,6 +944,7 @@
           <span class="chip">Web3</span>
           <span class="chip">Videos</span>
         </div>
+        <p class="what-post anim-item" style="--d:.78s"><b>What I post</b>Crypto news, parody Shorts and games, fresh on YouTube and Bluesky.</p>
       </div>
     </header>
 
@@ -973,7 +1055,25 @@
         <span class="count" id="posts-updated"></span>
       </div>
 
-      <h3 class="subhead first reveal">
+      <div id="yt-featured-wrap">
+        <h3 class="subhead first reveal">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4L15.8 12l-6.2 3.6z"/></svg>
+          Latest video
+          <a href="https://www.youtube.com/@0xstarayush" target="_blank" rel="noopener noreferrer">View channel</a>
+        </h3>
+        <div id="yt-featured" aria-busy="true">
+          <span class="sr-only" role="status">Loading latest video</span>
+          <div class="video-card skel" aria-hidden="true">
+            <span class="skel-block skel-thumb"></span>
+            <span class="video-body">
+              <span class="skel-line w85"></span>
+              <span class="skel-line w40"></span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="subhead reveal">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 10.8c-.72-1.36-2.67-4.8-4.68-6.24C5.9 3.52 4.5 3.5 3.72 3.78c-.87.32-1.22 1.4-1.22 2.42 0 .72.4 4.08.66 4.66.87 1.93 3.94 2.58 6.7 2.37-2.6.4-4.9 1.36-2.83 4.79 2.5 4.15 3.6-.25 3.97-1.22.37.97 1.42 5.3 3.94 1.22 2.03-3.37-.22-4.4-2.83-4.79 2.77.21 5.84-.44 6.7-2.37.27-.58.67-3.94.67-4.66 0-1.02-.36-2.1-1.22-2.42-.78-.28-2.18-.26-3.6.78C14.67 6 12.72 9.44 12 10.8z"/></svg>
         Bluesky
         <a href="https://bsky.app/profile/starayush.bsky.social" target="_blank" rel="noopener noreferrer">View profile</a>
@@ -1019,6 +1119,22 @@
           </span>
         </div>
       </div>
+
+      <div class="follow-cta reveal">
+        <h3>Follow along</h3>
+        <p>Subscribe on YouTube and follow on Bluesky, so the newest videos and posts reach you as soon as they drop.</p>
+        <div class="follow-actions">
+          <a class="btn btn-accent" href="https://www.youtube.com/@0xstarayush?sub_confirmation=1" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4L15.8 12l-6.2 3.6z"/></svg>
+            Subscribe on YouTube
+          </a>
+          <a class="btn btn-outline" href="https://bsky.app/profile/starayush.bsky.social" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 10.8c-.72-1.36-2.67-4.8-4.68-6.24C5.9 3.52 4.5 3.5 3.72 3.78c-.87.32-1.22 1.4-1.22 2.42 0 .72.4 4.08.66 4.66.87 1.93 3.94 2.58 6.7 2.37-2.6.4-4.9 1.36-2.83 4.79 2.5 4.15 3.6-.25 3.97-1.22.37.97 1.42 5.3 3.94 1.22 2.03-3.37-.22-4.4-2.83-4.79 2.77.21 5.84-.44 6.7-2.37.27-.58.67-3.94.67-4.66 0-1.02-.36-2.1-1.22-2.42-.78-.28-2.18-.26-3.6.78C14.67 6 12.72 9.44 12 10.8z"/></svg>
+            Follow on Bluesky
+          </a>
+        </div>
+      </div>
+      <p class="disclaimer reveal">Everything here is parody and entertainment, not financial advice. Always do your own research.</p>
     </section>
 
     <footer class="reveal">
@@ -1144,7 +1260,23 @@
   }
   function markUpdated() {
     var note = document.getElementById('posts-updated');
-    if (note) note.textContent = 'Updated just now';
+    if (!note) return;
+    var d = new Date();
+    var hh = d.getHours();
+    var ap = hh >= 12 ? 'PM' : 'AM';
+    var h12 = hh % 12;
+    if (h12 === 0) h12 = 12;
+    var mm = d.getMinutes();
+    note.textContent = 'Updated ' + h12 + ':' + (mm < 10 ? '0' : '') + mm + ' ' + ap +
+      ', ' + d.getDate() + ' ' + MONTHS[d.getMonth()];
+  }
+  /* Feed titles can arrive with HTML entities still encoded (a literal
+     &quot; instead of a quote), so decode them before display. */
+  var entityBox = document.createElement('textarea');
+  function decodeEntities(s) {
+    if (!s || s.indexOf('&') === -1) return s || '';
+    entityBox.innerHTML = s;
+    return entityBox.value;
   }
   function makeMeta(source, dateText, actionText) {
     var meta = document.createElement('span');
@@ -1181,6 +1313,8 @@
     box.appendChild(p);
   }
   function ytFallback(box) {
+    var fwrap = document.getElementById('yt-featured-wrap');
+    if (fwrap) fwrap.style.display = 'none';
     box.innerHTML = '';
     var a = externalLink(document.createElement('a'),
       'https://www.youtube.com/@0xstarayush');
@@ -1259,6 +1393,25 @@
       text.className = 'post-text';
       text.textContent = p.record.text;
       a.appendChild(text);
+      if (p.record.text.length > 240) {
+        text.classList.add('clamp');
+        var more = document.createElement('span');
+        more.className = 'post-more';
+        more.textContent = 'Read more';
+        more.setAttribute('role', 'button');
+        more.setAttribute('tabindex', '0');
+        var toggle = function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          var open = text.classList.toggle('expanded');
+          more.textContent = open ? 'Show less' : 'Read more';
+        };
+        more.addEventListener('click', toggle);
+        more.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') toggle(e);
+        });
+        a.appendChild(more);
+      }
       a.appendChild(makeMeta('Bluesky', fmtDate(p.record.createdAt), 'Open post'));
       frag.appendChild(a);
     });
@@ -1296,37 +1449,61 @@
             /youtu\.be\/([\w-]{6,})/.exec(link || '');
     return m ? m[1] : '';
   }
+  function makeVideoCard(v, i, featured) {
+    var a = externalLink(document.createElement('a'), v.link);
+    a.className = 'video-card pop-in' + (featured ? ' featured-card' : '');
+    a.style.setProperty('--pd', Math.min(i * 70, 350) + 'ms');
+    if (v.thumb) {
+      var thumb = document.createElement('span');
+      thumb.className = 'thumb';
+      var img = document.createElement('img');
+      var vid = ytVideoId(v.link);
+      if (featured && vid) {
+        img.src = 'https://i.ytimg.com/vi/' + vid + '/maxresdefault.jpg';
+        img.onerror = function () {
+          img.onerror = null;
+          img.src = 'https://i.ytimg.com/vi/' + vid + '/hqdefault.jpg';
+        };
+      } else {
+        img.src = v.thumb;
+      }
+      img.alt = 'Video thumbnail: ' + v.title;
+      img.loading = 'lazy';
+      thumb.appendChild(img);
+      if (featured) {
+        var tag = document.createElement('span');
+        tag.className = 'latest-badge';
+        tag.textContent = 'Latest video';
+        thumb.appendChild(tag);
+      }
+      var badge = document.createElement('span');
+      badge.className = 'play-badge';
+      badge.setAttribute('aria-hidden', 'true');
+      badge.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>';
+      thumb.appendChild(badge);
+      a.appendChild(thumb);
+    }
+    var body = document.createElement('span');
+    body.className = 'video-body';
+    var title = document.createElement('span');
+    title.className = 'video-title';
+    title.textContent = v.title;
+    body.appendChild(title);
+    body.appendChild(makeMeta('YouTube', fmtDate(v.date), 'Watch'));
+    a.appendChild(body);
+    return a;
+  }
   function renderYt(box, videos) {
     if (!videos.length) return false;
+    var featuredBox = document.getElementById('yt-featured');
+    if (featuredBox) {
+      featuredBox.innerHTML = '';
+      featuredBox.appendChild(makeVideoCard(videos[0], 0, true));
+      featuredBox.removeAttribute('aria-busy');
+    }
     var frag = document.createDocumentFragment();
-    videos.forEach(function (v, i) {
-      var a = externalLink(document.createElement('a'), v.link);
-      a.className = 'video-card pop-in';
-      a.style.setProperty('--pd', Math.min(i * 70, 350) + 'ms');
-      if (v.thumb) {
-        var thumb = document.createElement('span');
-        thumb.className = 'thumb';
-        var img = document.createElement('img');
-        img.src = v.thumb;
-        img.alt = 'Video thumbnail: ' + v.title;
-        img.loading = 'lazy';
-        thumb.appendChild(img);
-        var badge = document.createElement('span');
-        badge.className = 'play-badge';
-        badge.setAttribute('aria-hidden', 'true');
-        badge.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>';
-        thumb.appendChild(badge);
-        a.appendChild(thumb);
-      }
-      var body = document.createElement('span');
-      body.className = 'video-body';
-      var title = document.createElement('span');
-      title.className = 'video-title';
-      title.textContent = v.title;
-      body.appendChild(title);
-      body.appendChild(makeMeta('YouTube', fmtDate(v.date), 'Watch'));
-      a.appendChild(body);
-      frag.appendChild(a);
+    videos.slice(1).forEach(function (v, i) {
+      frag.appendChild(makeVideoCard(v, i, false));
     });
     box.innerHTML = '';
     box.appendChild(frag);
@@ -1341,7 +1518,7 @@
     }).slice(0, 4).map(function (v) {
       var id = ytVideoId(v.link);
       return {
-        title: v.title,
+        title: decodeEntities(v.title),
         link: v.link,
         date: v.pubDate,
         thumb: v.thumbnail || (id ? 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg' : '')
